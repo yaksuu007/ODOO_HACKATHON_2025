@@ -70,6 +70,7 @@
 </head>
 <body class="font-sans bg-gray-50">
     <!-- Navigation -->
+    <!-- Main navigation bar -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -128,9 +129,9 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main page content container -->
     <main>
-        <!-- Home Section -->
+        <!-- Home page section - visible by default -->
         <section id="home" class="section-content">
             <div class="gradient-bg text-white py-20">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -170,7 +171,7 @@
                 </div>
             </div>
 
-            <!-- Features -->
+            <!-- Features section showing key app features -->
             <div class="py-12 bg-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="lg:text-center">
@@ -237,7 +238,7 @@
                 </div>
             </div>
 
-            <!-- Popular Sports -->
+            <!-- Popular sports section with cards for each sport -->
             <div class="py-12 bg-gray-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="lg:text-center">
@@ -347,7 +348,7 @@
                 </div>
             </div>
 
-            <!-- Testimonials -->
+            <!-- Testimonials section with user reviews -->
             <div class="py-12 bg-white">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="lg:text-center">
@@ -437,7 +438,7 @@
             </div>
         </section>
 
-        <!-- Courts Section -->
+        <!-- Courts section - shows available sports facilities -->
         <section id="courts" class="section-content hidden">
             <div class="bg-white py-12">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -522,7 +523,7 @@
             </div>
         </section>
 
-        <!-- Community Section -->
+        <!-- Community section - discussion forums and player connections -->
         <section id="community" class="section-content hidden">
             <div class="bg-white py-12">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -653,7 +654,7 @@
             </div>
         </section>
 
-        <!-- Login Section -->
+        <!-- Login/Registration section - user authentication -->
         <section id="login" class="section-content hidden">
             <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
                 <div class="sm:mx-auto sm:w-full sm:max-w-md">
@@ -816,7 +817,7 @@
             </div>
         </section>
 
-        <!-- Court Booking Modal -->
+        <!-- Modal dialog for booking a court -->
         <div id="booking-modal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="hideModal('booking-modal')"></div>
@@ -875,7 +876,7 @@
             </div>
         </div>
 
-        <!-- Create Match Modal -->
+        <!-- Modal dialog for creating a new match -->
         <div id="create-match-modal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="hideModal('create-match-modal')"></div>
@@ -974,7 +975,7 @@
             </div>
         </div>
 
-        <!-- Booking Confirmation Toast -->
+        <!-- Toast notification for successful bookings -->
         <div id="booking-toast" class="fixed bottom-4 right-4 hidden">
             <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
                 <i class="fas fa-check-circle mr-2"></i>
@@ -986,7 +987,7 @@
         </div>
     </main>
 
-    <!-- Footer -->
+    <!-- Page footer with links and information -->
     <footer class="bg-gray-800">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -1092,8 +1093,9 @@
         </div>
     </footer>
 
+    <!-- Main JavaScript for the application -->
     <script>
-        // Database simulation
+        // Database simulation - in a real app this would be server-side
         const users = [
             { email: "user@example.com", password: "password123", name: "Demo User" }
         ];
@@ -1171,6 +1173,5 @@
             {
                 id: 1,
                 sport: "basketball",
-
 </body>
 </html>
