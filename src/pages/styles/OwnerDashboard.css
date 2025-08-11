@@ -1,0 +1,252 @@
+/* Layout */
+.owner-dashboard {
+  display: flex;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #f5f7fb;
+}
+
+/* Sidebar */
+.od-sidebar {
+  width: 250px;
+  background: #0f1724;
+  color: #fff;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.od-brand {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.od-sidebar nav button {
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.od-sidebar nav button:hover {
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+}
+.od-sidebar nav button.active {
+  background: linear-gradient(90deg,#ff6b00,#f97316);
+  color: white;
+  box-shadow: 0 6px 18px rgba(249,115,22,0.12);
+}
+
+/* Main content */
+.od-main {
+  flex: 1;
+  padding: 28px;
+  overflow-y: auto;
+}
+.od-header h1 {
+  margin: 0 0 18px 0;
+  font-size: 22px;
+}
+
+/* Sections */
+.od-section {
+  display: none;
+}
+.od-section.visible {
+  display: block;
+}
+
+/* My Courts cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+.court-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(13, 15, 23, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+.court-thumb {
+  height: 140px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.court-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.placeholder {
+  color: #94a3b8;
+  font-size: 14px;
+}
+.court-body {
+  padding: 14px;
+}
+.court-body h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+}
+.meta {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.status {
+  margin-top: 8px;
+}
+.card-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+.card-actions button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.card-actions .edit {
+  background: #e6f0ff;
+  color: #0f1724;
+}
+.card-actions .delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Add Court Form */
+.add-court-form {
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(13, 15, 23, 0.04);
+  max-width: 900px;
+}
+.form-row {
+  margin-bottom: 14px;
+}
+.form-row label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row select,
+.form-row input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6edf3;
+  background: #fbfdff;
+}
+.form-row.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.image-previews {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+.image-previews img {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(13,15,23,0.06);
+}
+.preview-empty {
+  color: #64748b;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.form-actions .primary {
+  background: linear-gradient(90deg,#ff6b00,#f97316);
+  color: #fff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.form-actions button {
+  background: #eef2ff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Bookings table */
+.bookings-list {
+  max-width: 1000px;
+}
+.bookings-table {
+  margin-top: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(13, 15, 23, 0.04);
+}
+.table-header, .table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px 14px;
+  align-items: center;
+  font-size: 13px;
+}
+.table-header {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #0f1724;
+}
+.table-row {
+  border-top: 1px solid #eef2f6;
+}
+.badge {
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-block;
+}
+.badge.confirmed { background: #ecfdf5; color: #065f46; }
+.badge.pending { background: #fffbeb; color: #a16207; }
+
+/* Settings form */
+.settings-form {
+  max-width: 700px;
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(13, 15, 23, 0.04);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .od-sidebar { display: none; }
+  .owner-dashboard { flex-direction: column; }
+  .od-main { padding: 16px; }
+  .form-row.two-col { grid-template-columns: 1fr; }
+  .table-header, .table-row { grid-template-columns: repeat(3, 1fr); }
+}

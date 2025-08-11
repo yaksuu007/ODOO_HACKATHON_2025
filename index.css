@@ -1,0 +1,214 @@
+/* index.css */
+
+/* CSS Reset - Normalize */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: #222;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: #007bff;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+a:hover,
+a:focus {
+  color: #0056b3;
+  outline: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #111;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 1em;
+  font-size: 1rem;
+}
+
+ul {
+  list-style: none;
+  margin-bottom: 1em;
+  padding-left: 1em;
+}
+
+li {
+  margin-bottom: 0.5em;
+  position: relative;
+  padding-left: 1.2em;
+}
+
+li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* Containers */
+.container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 15px;
+}
+
+/* Flex Helpers */
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-space-between {
+  justify-content: space-between;
+}
+
+/* Buttons */
+button,
+.btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover,
+.btn:hover {
+  background-color: #0056b3;
+}
+
+button:disabled,
+.btn:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Cards */
+.card,
+.court-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+
+.card:hover,
+.court-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Images inside cards */
+.card img,
+.court-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Inputs and form elements */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 15px;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 6px #007bffaa;
+}
+
+/* Links */
+.view-more-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 600;
+  color: #007bff;
+  cursor: pointer;
+  transition: text-decoration 0.3s ease;
+}
+
+.view-more-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Grid */
+.list-container {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 15px;
+}
+
+/* Utility classes */
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+
+.text-center {
+  text-align: center;
+}
+
+/* Responsive helpers */
+@media (max-width: 768px) {
+  .flex {
+    flex-direction: column;
+  }
+  .flex-space-between {
+    justify-content: center;
+  }
+}
+
+/* Scrollbar styles for webkit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #007bff88;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #0056b3cc;
+}
