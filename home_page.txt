@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickCourt - Local Sports Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        
+        .animate-pulse-hover:hover {
+            animation: pulse 1s infinite;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+        }
+        
+        /* Court booking animation */
+        @keyframes courtSelected {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+        
+        .court-selected {
+            animation: courtSelected 1s;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <!-- Main navigation bar -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-running text-indigo-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-indigo-600">QuickCourt</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" onclick="showSection('home')">
+                            Home
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" onclick="showSection('courts')">
+                            Courts
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" onclick="showSection('facilities')">
+                            Facilities
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" onclick="showSection('matches')">
+                            Matches
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" onclick="showSection('community')">
+                            Community
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search...">
+                    </div>
+                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all animate-pulse-hover" onclick="showSection('login')">
+                        Login / Register
+                    </button>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" onclick="toggleMobileMenu()">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="hidden sm:hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="#" class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" onclick="showSection('home'); toggleMobileMenu()">Home</a>
+                <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" onclick="showSection('courts'); toggleMobileMenu()">Courts</a>
+                <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" onclick="showSection('matches'); toggleMobileMenu()">Matches</a>
+                <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" onclick="showSection('community'); toggleMobileMenu()">Community</a>
+                <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium" onclick="showSection('login'); toggleMobileMenu()">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main page content container -->
+    <main>
+        <!-- Home page section - visible by default -->
+        <section id="home" class="section-content">
+            <div class="gradient-bg text-white py-20">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+                        <div class="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left animate-fade-in">
+                            <h1 class="text-4xl tracking-tight font-extrabold sm:text-5xl md:text-6xl">
+                                <span class="block">Book Local Sports</span>
+                                <span class="block text-indigo-200">Facilities Instantly</span>
+                            </h1>
+                            <p class="mt-3 text-base text-indigo-100 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                                QuickCourt connects sports enthusiasts with local facilities. Book courts, join matches, and meet players in your area.
+                            </p>
+                            <div class="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
+                                <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                                    <div class="rounded-md shadow">
+                                        <a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10" onclick="showSection('courts')">
+                                            Find Courts
+                                        </a>
+                                    </div>
+                                    <div class="mt-3 sm:mt-0 sm:ml-3">
+                                        <a href="#" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70 md:py-4 md:text-lg md:px-10" onclick="showSection('matches')">
+                                            Join Matches
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
+                            <div class="relative mx-auto w-full rounded-lg shadow-lg lg:max-w-md">
+                                <div class="relative block w-full bg-white overflow-hidden rounded-lg">
+                                    <img class="w-full h-auto" src="https://images.unsplash.com/photo-1547347298-4074fc3086f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="People playing sports">
+                                    <div class="absolute inset-0 bg-indigo-600 bg-opacity-20"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features section showing key app features -->
+            <div class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:text-center">
+                        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Features</h2>
+                        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                            A better way to play sports
+                        </p>
+                        <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                            Everything you need to organize and enjoy sports activities in your community.
+                        </p>
+                    </div>
+
+                    <div class="mt-10">
+                        <div class="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+                            <div class="relative group bg-gray-50 p-6 rounded-lg transition-all card-hover">
+                                <div>
+                                    <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Easy Booking</p>
+                                </div>
+                                <div class="mt-2 ml-16 text-base text-gray-500">
+                                    Book courts in just a few taps with our intuitive interface. Real-time availability and instant confirmation.
+                                </div>
+                            </div>
+
+                            <div class="relative group bg-gray-50 p-6 rounded-lg transition-all card-hover">
+                                <div>
+                                    <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Find Players</p>
+                                </div>
+                                <div class="mt-2 ml-16 text-base text-gray-500">
+                                    Connect with other players in your area. Join existing matches or create your own and invite others.
+                                </div>
+                            </div>
+
+                            <div class="relative group bg-gray-50 p-6 rounded-lg transition-all card-hover">
+                                <div>
+                                    <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                                        <i class="fas fa-map-marked-alt"></i>
+                                    </div>
+                                    <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Local Facilities</p>
+                                </div>
+                                <div class="mt-2 ml-16 text-base text-gray-500">
+                                    Discover the best sports facilities near you with detailed information and user reviews.
+                                </div>
+                            </div>
+
+                            <div class="relative group bg-gray-50 p-6 rounded-lg transition-all card-hover">
+                                <div>
+                                    <div class="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <p class="ml-16 text-lg leading-6 font-medium text-gray-900">Smart Reminders</p>
+                                </div>
+                                <div class="mt-2 ml-16 text-base text-gray-500">
+                                    Never miss a game with automated reminders and notifications about your upcoming bookings.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Popular sports section with cards for each sport -->
+            <div class="py-12 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:text-center">
+                        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Popular Sports</h2>
+                        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                            Find your favorite sport
+                        </p>
+                    </div>
+
+                    <div class="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+                        <div class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200 transition-all card-hover">
+                            <div class="flex-1 flex flex-col p-8">
+                                <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1490&q=80" alt="Basketball">
+                                <h3 class="mt-6 text-gray-900 text-sm font-medium">Basketball</h3>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200">
+                                    <div class="w-0 flex-1 flex">
+                                        <a href="#" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-indigo-500" onclick="filterCourts('basketball')">
+                                            <span>View Courts</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200 transition-all card-hover">
+                            <div class="flex-1 flex flex-col p-8">
+                                <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="https://images.unsplash.com/photo-1547347298-4074fc3086f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Badminton">
+                                <h3 class="mt-6 text-gray-900 text-sm font-medium">Badminton</h3>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200">
+                                    <div class="w-0 flex-1 flex">
+                                        <a href="#" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-indigo-500" onclick="filterCourts('badminton')">
+                                            <span>View Courts</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200 transition-all card-hover">
+                            <div class="flex-1 flex flex-col p-8">
+                                <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" alt="Football">
+                                <h3 class="mt-6 text-gray-900 text-sm font-medium">Football</h3>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200">
+                                    <div class="w-0 flex-1 flex">
+                                        <a href="#" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-indigo-500" onclick="filterCourts('football')">
+                                            <span>View Courts</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200 transition-all card-hover">
+                            <div class="flex-1 flex flex-col p-8">
+                                <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="https://images.unsplash.com/photo-1519861531473-9200262188bf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Tennis">
+                                <h3 class="mt-6 text-gray-900 text-sm font-medium">Tennis</h3>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200">
+                                    <div class="w-0 flex-1 flex">
+                                        <a href="#" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-indigo-500" onclick="filterCourts('tennis')">
+                                            <span>View Courts</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200 transition-all card-hover">
+                            <div class="flex-1 flex flex-col p-8">
+                                <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="https://images.unsplash.com/photo-1518640467707-f6816239371c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Table Tennis">
+                                <h3 class="mt-6 text-gray-900 text-sm font-medium">Table Tennis</h3>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200">
+                                    <div class="w-0 flex-1 flex">
+                                        <a href="#" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-indigo-500" onclick="filterCourts('table-tennis')">
+                                            <span>View Courts</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200 transition-all card-hover">
+                            <div class="flex-1 flex flex-col p-8">
+                                <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1493&q=80" alt="Volleyball">
+                                <h3 class="mt-6 text-gray-900 text-sm font-medium">Volleyball</h3>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200">
+                                    <div class="w-0 flex-1 flex">
+                                        <a href="#" class="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-indigo-500" onclick="filterCourts('volleyball')">
+                                            <span>View Courts</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonials section with user reviews -->
+            <div class="py-12 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:text-center">
+                        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Testimonials</h2>
+                        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                            What players are saying
+                        </p>
+                    </div>
+
+                    <div class="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="pt-6">
+                            <div class="flow-root bg-gray-50 rounded-lg px-6 pb-8 h-full transition-all card-hover">
+                                <div class="-mt-6">
+                                    <div>
+                                        <span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                                            <i class="fas fa-quote-left text-white text-xl"></i>
+                                        </span>
+                                    </div>
+                                    <h3 class="mt-8 text-lg font-medium text-gray-900 tracking-tight">Game Changer</h3>
+                                    <p class="mt-5 text-base text-gray-500">
+                                        QuickCourt has completely transformed how I play basketball. I can find courts and players anytime, anywhere. The booking system is seamless!
+                                    </p>
+                                    <div class="mt-6 flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Michael Jordan</p>
+                                            <p class="text-sm text-indigo-500">Basketball Player</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <div class="flow-root bg-gray-50 rounded-lg px-6 pb-8 h-full transition-all card-hover">
+                                <div class="-mt-6">
+                                    <div>
+                                        <span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                                            <i class="fas fa-quote-left text-white text-xl"></i>
+                                        </span>
+                                    </div>
+                                    <h3 class="mt-8 text-lg font-medium text-gray-900 tracking-tight">Perfect for Badminton</h3>
+                                    <p class="mt-5 text-base text-gray-500">
+                                        As a badminton enthusiast, I struggled to find good courts and players. QuickCourt solved both problems in one app. Highly recommended!
+                                    </p>
+                                    <div class="mt-6 flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Lin Dan</p>
+                                            <p class="text-sm text-indigo-500">Badminton Player</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <div class="flow-root bg-gray-50 rounded-lg px-6 pb-8 h-full transition-all card-hover">
+                                <div class="-mt-6">
+                                    <div>
+                                        <span class="inline-flex items-center justify-center p-3 bg-indigo-500 rounded-md shadow-lg">
+                                            <i class="fas fa-quote-left text-white text-xl"></i>
+                                        </span>
+                                    </div>
+                                    <h3 class="mt-8 text-lg font-medium text-gray-900 tracking-tight">Great Community</h3>
+                                    <p class="mt-5 text-base text-gray-500">
+                                        I've met so many great tennis players through QuickCourt. The community features make it easy to organize matches and improve my game.
+                                    </p>
+                                    <div class="mt-6 flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/75.jpg" alt="User">
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Roger Federer</p>
+                                            <p class="text-sm text-indigo-500">Tennis Player</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Courts section - shows available sports facilities -->
+        <section id="courts" class="section-content hidden">
+            <div class="bg-white py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:text-center">
+                        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Sports Facilities</h2>
+                        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                            Find and Book Courts
+                        </p>
+                        <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                            Browse through our extensive network of sports facilities and book your next game.
+                        </p>
+                    </div>
+
+                    <div class="mt-10">
+                        <div class="flex flex-col md:flex-row gap-4 mb-6">
+                            <div class="w-full md:w-1/3">
+                                <label for="sport-filter" class="block text-sm font-medium text-gray-700">Sport</label>
+                                <select id="sport-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option value="all">All Sports</option>
+                                    <option value="basketball">Basketball</option>
+                                    <option value="badminton">Badminton</option>
+                                    <option value="football">Football</option>
+                                    <option value="tennis">Tennis</option>
+                                    <option value="table-tennis">Table Tennis</option>
+                                    <option value="volleyball">Volleyball</option>
+                                </select>
+                            </div>
+                            <div class="w-full md:w-1/3">
+                                <label for="location-filter" class="block text-sm font-medium text-gray-700">Location</label>
+                                <select id="location-filter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option value="all">All Locations</option>
+                                    <option value="downtown">Downtown</option>
+                                    <option value="suburbs">Suburbs</option>
+                                    <option value="north">North Side</option>
+                                    <option value="south">South Side</option>
+                                    <option value="east">East Side</option>
+                                    <option value="west">West Side</option>
+                                </select>
+                            </div>
+                            <div class="w-full md:w-1/3 flex items-end">
+                                <button onclick="filterCourts()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all">
+                                    Filter Courts
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" id="courts-container">
+                            <!-- Courts will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Matches Section -->
+        <section id="matches" class="section-content hidden">
+            <div class="bg-white py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:text-center">
+                        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Join the Game</h2>
+                        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                            Find or Create Matches
+                        </p>
+                        <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                            Connect with other players and enjoy competitive or casual matches.
+                        </p>
+                    </div>
+
+                    <div class="mt-10">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-medium text-gray-900">Upcoming Matches</h3>
+                            <button onclick="showCreateMatchModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all">
+                                Create New Match
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" id="matches-container">
+                            <!-- Matches will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community section - discussion forums and player connections -->
+        <section id="community" class="section-content hidden">
+            <div class="bg-white py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="lg:text-center">
+                        <h2 class="text-base text-indigo-600 font-semibold tracking-wide uppercase">Community</h2>
+                        <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                            Connect with Players
+                        </p>
+                        <p class="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                            Join discussions, share tips, and meet fellow sports enthusiasts.
+                        </p>
+                    </div>
+
+                    <div class="mt-10">
+                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                            <div class="lg:col-span-2">
+                                <div class="bg-white shadow rounded-lg overflow-hidden">
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Discussions</h3>
+                                        <div class="space-y-4">
+                                            <div class="border-b border-gray-200 pb-4">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-gray-900">Looking for basketball players</p>
+                                                        <p class="text-sm text-gray-500">Posted by Michael Jordan 2 hours ago</p>
+                                                        <p class="mt-1 text-sm text-gray-600">Looking for intermediate to advanced players for weekly games at Downtown Sports Center...</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="border-b border-gray-200 pb-4">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-gray-900">Badminton tips for beginners</p>
+                                                        <p class="text-sm text-gray-500">Posted by Lin Dan 1 day ago</p>
+                                                        <p class="mt-1 text-sm text-gray-600">Sharing some basic techniques that helped me improve my game when I first started...</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="border-b border-gray-200 pb-4">
+                                                <div class="flex items-start space-x-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/75.jpg" alt="User">
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-gray-900">Tennis tournament coming up</p>
+                                                        <p class="text-sm text-gray-500">Posted by Roger Federer 3 days ago</p>
+                                                        <p class="mt-1 text-sm text-gray-600">The annual city tennis tournament registration is now open. Who's joining this year?...</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                                View all discussions →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="bg-white shadow rounded-lg overflow-hidden">
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-medium text-gray-900 mb-4">Top Players</h3>
+                                        <div class="space-y-4">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Michael Jordan</p>
+                                                    <p class="text-sm text-gray-500">Basketball • 42 matches</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Lin Dan</p>
+                                                    <p class="text-sm text-gray-500">Badminton • 35 matches</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/75.jpg" alt="User">
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Roger Federer</p>
+                                                    <p class="text-sm text-gray-500">Tennis • 28 matches</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/65.jpg" alt="User">
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Serena Williams</p>
+                                                    <p class="text-sm text-gray-500">Tennis • 25 matches</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <div class="flex-shrink-0">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/22.jpg" alt="User">
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Lionel Messi</p>
+                                                    <p class="text-sm text-gray-500">Football • 20 matches</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <button class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                                View all players →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login/Registration section - user authentication -->
+        <section id="login" class="section-content hidden">
+            <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+                <div class="sm:mx-auto sm:w-full sm:max-w-md">
+                    <div class="flex justify-center">
+                        <i class="fas fa-running text-indigo-600 text-4xl"></i>
+                    </div>
+                    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                        Sign in to your account
+                    </h2>
+                    <p class="mt-2 text-center text-sm text-gray-600">
+                        Or
+                        <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500" onclick="showRegisterForm()">
+                            register for a new account
+                        </a>
+                    </p>
+                </div>
+
+                <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10" id="login-form">
+                        <form class="space-y-6" onsubmit="handleLogin(event)">
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">
+                                    Email address
+                                </label>
+                                <div class="mt-1">
+                                    <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">
+                                    Password
+                                </label>
+                                <div class="mt-1">
+                                    <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                                        Remember me
+                                    </label>
+                                </div>
+
+                                <div class="text-sm">
+                                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                        Forgot your password?
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Sign in
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-6">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-2 bg-white text-gray-500">
+                                        Or continue with
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 grid grid-cols-3 gap-3">
+                                <div>
+                                    <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Sign in with Facebook</span>
+                                        <i class="fab fa-facebook-f text-blue-600"></i>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Sign in with Google</span>
+                                        <i class="fab fa-google text-red-600"></i>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Sign in with Apple</span>
+                                        <i class="fab fa-apple text-gray-900"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 hidden" id="register-form">
+                        <form class="space-y-6" onsubmit="handleRegister(event)">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700">
+                                    Full Name
+                                </label>
+                                <div class="mt-1">
+                                    <input id="name" name="name" type="text" autocomplete="name" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">
+                                    Email address
+                                </label>
+                                <div class="mt-1">
+                                    <input id="reg-email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700">
+                                    Password
+                                </label>
+                                <div class="mt-1">
+                                    <input id="reg-password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="confirm-password" class="block text-sm font-medium text-gray-700">
+                                    Confirm Password
+                                </label>
+                                <div class="mt-1">
+                                    <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <input id="terms" name="terms" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" required>
+                                <label for="terms" class="ml-2 block text-sm text-gray-900">
+                                    I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500">Terms and Conditions</a>
+                                </label>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Register
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-6">
+                            <p class="text-center text-sm text-gray-600">
+                                Already have an account? 
+                                <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500" onclick="showLoginForm()">
+                                    Sign in
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal dialog for booking a court -->
+        <div id="booking-modal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="hideModal('booking-modal')"></div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fas fa-calendar-check text-indigo-600"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Book Court
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500" id="court-name">
+                                        Downtown Basketball Court
+                                    </p>
+                                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <label for="booking-date" class="block text-sm font-medium text-gray-700">Date</label>
+                                            <input type="date" id="booking-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="booking-time" class="block text-sm font-medium text-gray-700">Time</label>
+                                            <select id="booking-time" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                <option>8:00 AM - 10:00 AM</option>
+                                                <option>10:00 AM - 12:00 PM</option>
+                                                <option>12:00 PM - 2:00 PM</option>
+                                                <option>2:00 PM - 4:00 PM</option>
+                                                <option>4:00 PM - 6:00 PM</option>
+                                                <option>6:00 PM - 8:00 PM</option>
+                                                <option>8:00 PM - 10:00 PM</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <label for="booking-notes" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+                                        <textarea id="booking-notes" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" onclick="confirmBooking()">
+                            Confirm Booking
+                        </button>
+                        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="hideModal('booking-modal')">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal dialog for creating a new match -->
+        <div id="create-match-modal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="hideModal('create-match-modal')"></div>
+
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fas fa-users text-indigo-600"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Create New Match
+                                </h3>
+                                <div class="mt-2">
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <div>
+                                            <label for="match-sport" class="block text-sm font-medium text-gray-700">Sport</label>
+                                            <select id="match-sport" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                <option>Basketball</option>
+                                                <option>Badminton</option>
+                                                <option>Football</option>
+                                                <option>Tennis</option>
+                                                <option>Table Tennis</option>
+                                                <option>Volleyball</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="match-court" class="block text-sm font-medium text-gray-700">Court</label>
+                                            <select id="match-court" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                <option>Downtown Basketball Court</option>
+                                                <option>Central Park Badminton Courts</option>
+                                                <option>City Football Turf</option>
+                                                <option>Westside Tennis Club</option>
+                                                <option>Community Center Table Tennis</option>
+                                                <option>Beach Volleyball Courts</option>
+                                            </select>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="match-date" class="block text-sm font-medium text-gray-700">Date</label>
+                                                <input type="date" id="match-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            </div>
+                                            <div>
+                                                <label for="match-time" class="block text-sm font-medium text-gray-700">Time</label>
+                                                <select id="match-time" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                    <option>8:00 AM - 10:00 AM</option>
+                                                    <option>10:00 AM - 12:00 PM</option>
+                                                    <option>12:00 PM - 2:00 PM</option>
+                                                    <option>2:00 PM - 4:00 PM</option>
+                                                    <option>4:00 PM - 6:00 PM</option>
+                                                    <option>6:00 PM - 8:00 PM</option>
+                                                    <option>8:00 PM - 10:00 PM</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="match-players" class="block text-sm font-medium text-gray-700">Players Needed</label>
+                                            <select id="match-players" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                <option>1</option>
+                                                <option>2</option>
+                                                <option>3</option>
+                                                <option>4</option>
+                                                <option>5+</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="match-skill" class="block text-sm font-medium text-gray-700">Skill Level</label>
+                                            <select id="match-skill" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                <option>Beginner</option>
+                                                <option>Intermediate</option>
+                                                <option>Advanced</option>
+                                                <option>All Levels</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="match-notes" class="block text-sm font-medium text-gray-700">Additional Notes</label>
+                                            <textarea id="match-notes" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Any special requirements or details about the match"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" onclick="confirmCreateMatch()">
+                            Create Match
+                        </button>
+                        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="hideModal('create-match-modal')">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast notification for successful bookings -->
+        <div id="booking-toast" class="fixed bottom-4 right-4 hidden">
+            <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>Your booking has been confirmed!</span>
+                <button class="ml-4" onclick="hideToast()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Page footer with links and information -->
+    <footer class="bg-gray-800">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">QuickCourt</h3>
+                    <ul class="mt-4 space-y-4">
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('about')">
+                                About Us
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('careers')">
+                                Careers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('blog')">
+                                Blog
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Support</h3>
+                    <ul class="mt-4 space-y-4">
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('help')">
+                                Help Center
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('safety')">
+                                Safety
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('community')">
+                                Community Guidelines
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
+                    <ul class="mt-4 space-y-4">
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('terms')">
+                                Terms of Service
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('privacy')">
+                                Privacy Policy
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="text-base text-gray-300 hover:text-white" onclick="showSection('cookie')">
+                                Cookie Policy
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Connect</h3>
+                    <div class="mt-4 flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                    <div class="mt-6">
+                        <p class="text-gray-300 text-sm">
+                            Subscribe to our newsletter
+                        </p>
+                        <div class="mt-2 flex">
+                            <input type="email" placeholder="Your email" class="px-3 py-2 border border-gray-600 bg-gray-700 text-white rounded-l-md focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 w-full">
+                            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-md">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between">
+                <p class="text-gray-400 text-sm">
+                    &copy; 2023 QuickCourt. All rights reserved.
+                </p>
+                <div class="mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white text-sm mr-4">Privacy</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm mr-4">Terms</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main JavaScript for the application -->
+    <script>
+        // Database simulation - in a real app this would be server-side
+        const users = [
+            { email: "user@example.com", password: "password123", name: "Demo User" }
+        ];
+        
+        const courts = [
+            {
+                id: 1,
+                name: "Downtown Basketball Court",
+                sport: "basketball",
+                location: "downtown",
+                image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1490&q=80",
+                description: "Full-size basketball court with professional flooring and lighting. Perfect for serious games.",
+                price: "$25/hour",
+                rating: 4.8,
+                reviews: 124
+            },
+            {
+                id: 2,
+                name: "Central Park Badminton Courts",
+                sport: "badminton",
+                location: "suburbs",
+                image: "https://images.unsplash.com/photo-1547347298-4074fc3086f0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                description: "6 professional badminton courts with wooden flooring and excellent lighting.",
+                price: "$15/hour",
+                rating: 4.7,
+                reviews: 89
+            },
+            {
+                id: 3,
+                name: "City Football Turf",
+                sport: "football",
+                location: "north",
+                image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80",
+                description: "Full-size artificial turf football field with floodlights for night games.",
+                price: "$80/hour",
+                rating: 4.9,
+                reviews: 156
+            },
+            {
+                id: 4,
+                name: "Westside Tennis Club",
+                sport: "tennis",
+                location: "west",
+                image: "https://images.unsplash.com/photo-1519861531473-9200262188bf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80",
+                description: "4 outdoor tennis courts with synthetic grass surface. Clubhouse with showers available.",
+                price: "$30/hour",
+                rating: 4.6,
+                reviews: 72
+            },
+            {
+                id: 5,
+                name: "Community Center Table Tennis",
+                sport: "table-tennis",
+                location: "east",
+                image: "https://images.unsplash.com/photo-1518640467707-f6816239371c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+                description: "8 professional table tennis tables in air-conditioned hall. Equipment rental available.",
+                price: "$10/hour",
+                rating: 4.5,
+                reviews: 53
+            },
+            {
+                id: 6,
+                name: "Beach Volleyball Courts",
+                sport: "volleyball",
+                location: "south",
+                image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1493&q=80",
+                description: "4 beach volleyball courts right by the ocean. Perfect for summer games.",
+                price: "$20/hour",
+                rating: 4.8,
+                reviews: 67
+            }
+        ];
+        
+        const matches = [
+            {
+                id: 1,
+                sport: "basketball",
+</body>
+</html>
