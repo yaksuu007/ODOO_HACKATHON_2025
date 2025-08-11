@@ -12,6 +12,8 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import BookingSuccess from "./pages/BookingSuccess";
 import MyBookings from "./pages/MyBookings";
 import LandingPage from "./pages/LandingPage";
+import Facilities from "./pages/Facilities";
+import Matches from "./pages/Matches";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -53,6 +55,8 @@ function App() {
   <Route path="/" element={<LandingPage />} />
   <Route path="/Auth" element={<Auth setUser={setUser} />} />
   <Route path="/VenueListing" element={<VenueListing />} />
+  <Route path="/Facilities" element={<Facilities />} />
+  <Route path="/Matches" element={<Matches />} />
   <Route path="/venue/:id" element={<VenueDetails />} />
   <Route path="/Profile" element={<Profile user={user} />} />
   <Route path="/OwnerDashboard" element={<OwnerDashboard />} />

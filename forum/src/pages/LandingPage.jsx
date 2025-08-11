@@ -51,44 +51,14 @@ const LandingPage = () => {
     navigate('/');
   };
 
-  // Sports images data
+  // Sports images data (images placed in /public/images/)
   const sportsImages = [
-    {
-      id: 1,
-      name: "Tennis",
-      image: "https://source.unsplash.com/random/600x400/?tennis-court",
-      description: "Professional tennis courts with premium surfaces"
-    },
-    {
-      id: 2,
-      name: "Basketball",
-      image: "https://source.unsplash.com/random/600x400/?basketball-court",
-      description: "Indoor and outdoor basketball facilities"
-    },
-    {
-      id: 3,
-      name: "Badminton",
-      image: "https://source.unsplash.com/random/600x400/?badminton-court",
-      description: "Olympic-standard badminton courts"
-    },
-    {
-      id: 4,
-      name: "Soccer",
-      image: "https://source.unsplash.com/random/600x400/?soccer-field",
-      description: "Full-size soccer fields and training grounds"
-    },
-    {
-      id: 5,
-      name: "Cricket",
-      image: "https://source.unsplash.com/random/600x400/?cricket-ground",
-      description: "Professional cricket grounds and nets"
-    },
-    {
-      id: 6,
-      name: "Swimming",
-      image: "https://source.unsplash.com/random/600x400/?swimming-pool",
-      description: "Olympic-size swimming pools and training facilities"
-    }
+    { id: 1, name: 'Tennis', image: '/images/tennis.jpg', description: 'Professional tennis courts with premium surfaces' },
+    { id: 2, name: 'Basketball', image: '/images/basketball.jpg', description: 'Indoor and outdoor basketball facilities' },
+    { id: 3, name: 'Badminton', image: '/images/badminton.jpg', description: 'Olympic-standard badminton courts' },
+    { id: 4, name: 'Soccer', image: '/images/soccer.jpg', description: 'Full-size soccer fields and training grounds' },
+    { id: 5, name: 'Cricket', image: '/images/cricket.jpg', description: 'Professional cricket grounds and nets' },
+    { id: 6, name: 'Swimming', image: '/images/swimming.jpg', description: 'Olympic-size swimming pools and training facilities' },
   ];
 
   // Features data
@@ -205,7 +175,14 @@ const LandingPage = () => {
             {sportsImages.map((sport) => (
               <div key={sport.id} className="sport-card">
                 <div className="sport-image">
-                  <img src={sport.image} alt={sport.name} />
+                  <img
+                    src={sport.image}
+                    alt={sport.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = `https://source.unsplash.com/1200x800/?${sport.name.toLowerCase()}`;
+                    }}
+                  />
                   <div className="sport-overlay">
                     <h3>{sport.name}</h3>
                     <p>{sport.description}</p>
@@ -222,7 +199,7 @@ const LandingPage = () => {
       <section className="features-section">
         <div className="container">
           <div className="section-header">
-            <h2>Why Choose Quick Court?</h2>
+            <h2>Why Choose CORTLY?</h2>
             <p>Experience the difference with our comprehensive sports venue booking platform</p>
           </div>
           <div className="features-grid">
@@ -300,7 +277,7 @@ const LandingPage = () => {
         <div className="container">
           <div className="cta-content">
             <h2>Ready to Start Your Sports Journey?</h2>
-            <p>Join thousands of athletes and sports enthusiasts who trust Quick Court for their venue bookings</p>
+            <p>Join thousands of athletes and sports enthusiasts who trust CORTLY for their venue bookings</p>
             <div className="cta-buttons">
               <button className="btn-primary btn-large" onClick={handleGetStarted}>
                 {isLoggedIn ? 'Browse Venues' : 'Get Started Today'}
@@ -318,7 +295,7 @@ const LandingPage = () => {
             <div className="footer-section">
               <div className="footer-logo">
                 <span className="logo-icon">🏟️</span>
-                <span>Quick Court</span>
+                <span>CORTLY</span>
               </div>
               <p>Your premier destination for sports venue bookings. Connect with quality facilities and elevate your game.</p>
               <div className="social-links">
@@ -349,14 +326,14 @@ const LandingPage = () => {
             <div className="footer-section">
               <h3>Contact Info</h3>
               <div className="contact-info">
-                <p><i className="fas fa-envelope"></i> info@quickcourt.com</p>
+                 <p><i className="fas fa-envelope"></i> info@cortly.com</p>
                 <p><i className="fas fa-phone"></i> +1 (555) 123-4567</p>
                 <p><i className="fas fa-map-marker-alt"></i> 123 Sports Ave, City</p>
               </div>
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 Quick Court. All rights reserved.</p>
+            <p>&copy; 2025 CORTLY. All rights reserved.</p>
           </div>
         </div>
       </footer>

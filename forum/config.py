@@ -3,14 +3,26 @@ from datetime import timedelta
 
 class Config:
     # Database Configuration
+    USE_SQLITE = os.getenv('USE_SQLITE', 'true').lower() == 'true'
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_USER = os.getenv('DB_USER', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
     DB_NAME = os.getenv('DB_NAME', 'hackathon')
     DB_PORT = os.getenv('DB_PORT', '3306')
-    
+    # Secondary DB for matches
+    MATCHES_DB_NAME = os.getenv('MATCHES_DB_NAME', 'hackathon_matches')
+
     # SQLAlchemy Configuration
-    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    if USE_SQLITE:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///hackathon.db'
+        SQLALCHEMY_BINDS = {
+            'matches': 'sqlite:///hackathon_matches.db'
+        }
+    else:
+        SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+        SQLALCHEMY_BINDS = {
+            'matches': f'mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{MATCHES_DB_NAME}'
+        }
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 300,

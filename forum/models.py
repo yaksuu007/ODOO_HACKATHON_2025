@@ -265,6 +265,47 @@ class VenueImage(db.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
 
+class Match(db.Model):
+    __bind_key__ = 'matches'
+    __tablename__ = 'matches'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(150), nullable=False)
+    sport = db.Column(db.String(50), nullable=False)
+    venue_id = db.Column(db.Integer, nullable=False)  # references primary DB venue.v_no logically
+    date = db.Column(db.Date, nullable=False)
+    start_time = db.Column(db.Time, nullable=False)
+    duration_hours = db.Column(db.Integer, nullable=False, default=1)
+    max_players = db.Column(db.Integer, nullable=False, default=10)
+    current_players = db.Column(db.Integer, nullable=False, default=1)
+    status = db.Column(db.Enum('scheduled', 'cancelled', 'completed'), nullable=False, default='scheduled')
+    created_by = db.Column(db.Integer, nullable=False)  # references login.sr_no logically
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        try:
+            # Lazy import to avoid circulars
+            venue = Venue.query.get(self.venue_id)
+            venue_name = venue.court_name if venue else None
+        except Exception:
+            venue_name = None
+
+        return {
+            "id": self.id,
+            "title": self.title,
+            "sport": self.sport,
+            "venue_id": self.venue_id,
+            "venue_name": venue_name,
+            "date": self.date.isoformat() if self.date else None,
+            "start_time": self.start_time.isoformat() if self.start_time else None,
+            "duration_hours": self.duration_hours,
+            "max_players": self.max_players,
+            "current_players": self.current_players,
+            "status": self.status,
+            "created_by": self.created_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }
+
 # Event listeners for automatic updates
 @event.listens_for(Venue, 'after_insert')
 def update_venue_rating(mapper, connection, target):

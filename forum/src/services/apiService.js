@@ -210,6 +210,32 @@ class ApiService {
         return this.request(`/dashboard/player/${userId}`);
     }
 
+    // Matches APIs (secondary DB)
+    async getMatches(filters = {}) {
+        const params = new URLSearchParams(filters);
+        return this.request(`/matches?${params}`);
+    }
+
+    async createMatch(matchData) {
+        return this.request('/matches', {
+            method: 'POST',
+            body: JSON.stringify(matchData)
+        });
+    }
+
+    async updateMatch(matchId, matchData) {
+        return this.request(`/matches/${matchId}`, {
+            method: 'PUT',
+            body: JSON.stringify(matchData)
+        });
+    }
+
+    async deleteMatch(matchId) {
+        return this.request(`/matches/${matchId}`, {
+            method: 'DELETE'
+        });
+    }
+
     // File Upload APIs
     async uploadProfileImage(file) {
         const formData = new FormData();

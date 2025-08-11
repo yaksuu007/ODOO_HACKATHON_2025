@@ -75,8 +75,8 @@ const Navbar = ({ user, onLogout }) => {
         <div className="nav-container">
           <div className="nav-logo">
             <Link to="/" className="logo-link">
-              <span className="logo-icon">🏟️</span>
-              <span className="logo-text">Quick Court</span>
+              <img src="/images/logo-cortly.png" alt="CORTLY" style={{ width: 28, height: 28, borderRadius: '50%' }} />
+              <span className="logo-text">CORTLY</span>
             </Link>
           </div>
           
@@ -94,6 +94,20 @@ const Navbar = ({ user, onLogout }) => {
               onClick={handleNavLinkClick}
             >
               Venues
+            </Link>
+            <Link 
+              to="/Facilities" 
+              className={`nav-link ${isActiveRoute('/Facilities') ? 'active' : ''}`}
+              onClick={handleNavLinkClick}
+            >
+              Facilities
+            </Link>
+            <Link 
+              to="/Matches" 
+              className={`nav-link ${isActiveRoute('/Matches') ? 'active' : ''}`}
+              onClick={handleNavLinkClick}
+            >
+              Matches
             </Link>
             {isLoggedIn && (
               <>
@@ -168,11 +182,11 @@ const Navbar = ({ user, onLogout }) => {
       {/* Mobile Sidebar */}
       <div className={`mobile-overlay ${isMenuOpen ? 'active' : ''}`} onClick={closeMobileMenu}></div>
       <div className={`mobile-sidebar ${isMenuOpen ? 'active' : ''}`}>
-        <div className="mobile-sidebar-header">
+          <div className="mobile-sidebar-header">
           <div className="nav-logo">
             <Link to="/" className="logo-link" onClick={closeMobileMenu}>
-              <span className="logo-icon">🏟️</span>
-              <span className="logo-text">Quick Court</span>
+              <img src="/images/logo-cortly.png" alt="CORTLY" style={{ width: 24, height: 24, borderRadius: '50%' }} />
+              <span className="logo-text">CORTLY</span>
             </Link>
           </div>
           <button className="mobile-sidebar-close" onClick={closeMobileMenu}>
@@ -196,6 +210,22 @@ const Navbar = ({ user, onLogout }) => {
           >
             <i className="fas fa-map-marker-alt"></i>
             Venues
+          </Link>
+          <Link 
+            to="/Facilities" 
+            className={`mobile-nav-link ${isActiveRoute('/Facilities') ? 'active' : ''}`}
+            onClick={closeMobileMenu}
+          >
+            <i className="fas fa-building"></i>
+            Facilities
+          </Link>
+          <Link 
+            to="/Matches" 
+            className={`mobile-nav-link ${isActiveRoute('/Matches') ? 'active' : ''}`}
+            onClick={closeMobileMenu}
+          >
+            <i className="fas fa-futbol"></i>
+            Matches
           </Link>
           {isLoggedIn && (
             <>

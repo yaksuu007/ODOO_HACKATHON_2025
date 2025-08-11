@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
 from flask_login import login_required, current_user, login_user, logout_user
-from models import db, Login, Venue, Booking, Review
+from models import db, Login, Venue, Booking, Review, Match
 from flask_bcrypt import Bcrypt
 from datetime import datetime, date, time
 from sqlalchemy import and_, or_, func
@@ -536,3 +536,96 @@ def get_dashboard_stats():
         
     except Exception as e:
         return jsonify({"error": f"Failed to fetch stats: {str(e)}"}), 500
+
+# Matches routes (secondary DB)
+@api.route("/matches", methods=["GET"])
+def list_matches():
+    try:
+        sport = request.args.get('sport')
+        venue_id = request.args.get('venue_id', type=int)
+        status = request.args.get('status')
+
+        query = Match.query
+        if sport:
+            query = query.filter(Match.sport == sport)
+        if venue_id:
+            query = query.filter(Match.venue_id == venue_id)
+        if status:
+            query = query.filter(Match.status == status)
+
+        matches = query.order_by(Match.date.asc(), Match.start_time.asc()).all()
+        return jsonify([m.to_dict() for m in matches]), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch matches: {str(e)}"}), 500
+
+@api.route("/matches", methods=["POST"])
+@login_required
+def create_match():
+    try:
+        data = request.json
+        required = ["title", "sport", "venue_id", "date", "start_time", "duration_hours", "max_players"]
+        for f in required:
+            if f not in data:
+                return jsonify({"error": f"Missing required field: {f}"}), 400
+
+        # Validate venue exists in primary DB
+        venue = Venue.query.get(data["venue_id"])
+        if not venue:
+            return jsonify({"error": "Venue not found"}), 404
+
+        match = Match(
+            title=data["title"],
+            sport=data["sport"],
+            venue_id=venue.v_no,
+            date=datetime.strptime(data["date"], "%Y-%m-%d").date(),
+            start_time=datetime.strptime(data["start_time"], "%H:%M").time(),
+            duration_hours=int(data["duration_hours"]),
+            max_players=int(data["max_players"]),
+            current_players=min(1, int(data.get("current_players", 1))),
+            status=data.get("status", "scheduled"),
+            created_by=current_user.sr_no
+        )
+
+        db.session.add(match)
+        db.session.commit()
+        return jsonify({"message": "Match created", "match": match.to_dict()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to create match: {str(e)}"}), 500
+
+@api.route("/matches/<int:match_id>", methods=["PUT"])
+@login_required
+def update_match(match_id):
+    try:
+        match = Match.query.get(match_id)
+        if not match:
+            return jsonify({"error": "Match not found"}), 404
+
+        data = request.json or {}
+        for field in ["title", "sport", "duration_hours", "max_players", "status"]:
+            if field in data:
+                setattr(match, field, data[field])
+        if "date" in data:
+            match.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+        if "start_time" in data:
+            match.start_time = datetime.strptime(data["start_time"], "%H:%M").time()
+
+        db.session.commit()
+        return jsonify({"message": "Match updated", "match": match.to_dict()}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update match: {str(e)}"}), 500
+
+@api.route("/matches/<int:match_id>", methods=["DELETE"])
+@login_required
+def delete_match(match_id):
+    try:
+        match = Match.query.get(match_id)
+        if not match:
+            return jsonify({"error": "Match not found"}), 404
+        db.session.delete(match)
+        db.session.commit()
+        return jsonify({"message": "Match deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to delete match: {str(e)}"}), 500
