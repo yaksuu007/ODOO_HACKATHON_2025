@@ -38,6 +38,12 @@ const Navbar = ({ user, onLogout }) => {
     checkAuthStatus();
   }, [user]);
 
+  // Ensure light-theme is not applied anymore
+  useEffect(() => {
+    document.body.classList.remove('light-theme');
+    localStorage.removeItem('theme');
+  }, []);
+
   const handleProfileClick = () => {
     navigate('/Profile');
     setIsMenuOpen(false);
@@ -69,6 +75,8 @@ const Navbar = ({ user, onLogout }) => {
     setIsMenuOpen(false);
   };
 
+  const isFacilityOwner = currentUser?.designation === 'facilities';
+
   return (
     <>
       <nav className="navbar">
@@ -95,13 +103,15 @@ const Navbar = ({ user, onLogout }) => {
             >
               Venues
             </Link>
-            <Link 
-              to="/Facilities" 
-              className={`nav-link ${isActiveRoute('/Facilities') ? 'active' : ''}`}
-              onClick={handleNavLinkClick}
-            >
-              Facilities
-            </Link>
+            {isFacilityOwner && (
+              <Link 
+                to="/Facilities" 
+                className={`nav-link ${isActiveRoute('/Facilities') ? 'active' : ''}`}
+                onClick={handleNavLinkClick}
+              >
+                Facilities
+              </Link>
+            )}
             <Link 
               to="/Matches" 
               className={`nav-link ${isActiveRoute('/Matches') ? 'active' : ''}`}
@@ -119,12 +129,21 @@ const Navbar = ({ user, onLogout }) => {
                   My Bookings
                 </Link>
                 <Link 
-                  to="/OwnerDashboard" 
-                  className={`nav-link ${isActiveRoute('/OwnerDashboard') ? 'active' : ''}`}
+                  to="/MyBookings?view=past" 
+                  className={`nav-link ${isActiveRoute('/MyBookings') && location.search.includes('view=past') ? 'active' : ''}`}
                   onClick={handleNavLinkClick}
                 >
-                  My Facilities
+                  P_BOOKED
                 </Link>
+                {isFacilityOwner && (
+                  <Link 
+                    to="/OwnerDashboard" 
+                    className={`nav-link ${isActiveRoute('/OwnerDashboard') ? 'active' : ''}`}
+                    onClick={handleNavLinkClick}
+                  >
+                    My Facilities
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -211,14 +230,16 @@ const Navbar = ({ user, onLogout }) => {
             <i className="fas fa-map-marker-alt"></i>
             Venues
           </Link>
-          <Link 
-            to="/Facilities" 
-            className={`mobile-nav-link ${isActiveRoute('/Facilities') ? 'active' : ''}`}
-            onClick={closeMobileMenu}
-          >
-            <i className="fas fa-building"></i>
-            Facilities
-          </Link>
+          {isFacilityOwner && (
+            <Link 
+              to="/Facilities" 
+              className={`mobile-nav-link ${isActiveRoute('/Facilities') ? 'active' : ''}`}
+              onClick={closeMobileMenu}
+            >
+              <i className="fas fa-building"></i>
+              Facilities
+            </Link>
+          )}
           <Link 
             to="/Matches" 
             className={`mobile-nav-link ${isActiveRoute('/Matches') ? 'active' : ''}`}
@@ -238,13 +259,23 @@ const Navbar = ({ user, onLogout }) => {
                 My Bookings
               </Link>
               <Link 
-                to="/OwnerDashboard" 
-                className={`mobile-nav-link ${isActiveRoute('/OwnerDashboard') ? 'active' : ''}`}
+                to="/MyBookings?view=past" 
+                className={`mobile-nav-link ${isActiveRoute('/MyBookings') && location.search.includes('view=past') ? 'active' : ''}`}
                 onClick={closeMobileMenu}
               >
-                <i className="fas fa-building"></i>
-                My Facilities
+                <i className="fas fa-history"></i>
+                P_BOOKED
               </Link>
+              {isFacilityOwner && (
+                <Link 
+                  to="/OwnerDashboard" 
+                  className={`mobile-nav-link ${isActiveRoute('/OwnerDashboard') ? 'active' : ''}`}
+                  onClick={closeMobileMenu}
+                >
+                  <i className="fas fa-building"></i>
+                  My Facilities
+                </Link>
+              )}
             </>
           )}
         </div>

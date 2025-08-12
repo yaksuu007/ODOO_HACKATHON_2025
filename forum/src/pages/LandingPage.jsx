@@ -33,9 +33,18 @@ const LandingPage = () => {
 
   const handleGetStarted = () => {
     if (isLoggedIn) {
-      navigate('/venues');
+      navigate('/VenueListing');
     } else {
-      navigate('/auth');
+      navigate('/Auth?redirect=/VenueListing');
+    }
+  };
+
+  const handleBookSport = (sportName) => {
+    const target = `/VenueListing?sport=${encodeURIComponent(sportName)}`;
+    if (isLoggedIn) {
+      navigate(target);
+    } else {
+      navigate(`/Auth?redirect=${encodeURIComponent(target)}`);
     }
   };
 
@@ -139,7 +148,7 @@ const LandingPage = () => {
               <button className="btn-primary btn-large" onClick={handleGetStarted}>
                 {isLoggedIn ? 'Browse Venues' : 'Start Booking Now'}
               </button>
-              <button className="btn-outline btn-large">
+              <button className="btn-outline btn-large" onClick={() => navigate('/VenueListing')}>
                 View Venues
               </button>
             </div>
@@ -159,7 +168,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="hero-image">
-            <img src="https://source.unsplash.com/random/600x500/?sports-venue" alt="Sports Venue" />
+            <img src="https://i.ibb.co/Xxfh0CSK/Screenshot-2025-08-12-072956.png"/>
           </div>
         </div>
       </section>
@@ -186,7 +195,7 @@ const LandingPage = () => {
                   <div className="sport-overlay">
                     <h3>{sport.name}</h3>
                     <p>{sport.description}</p>
-                    <button className="btn-primary">Book Now</button>
+                    <button className="btn-primary" onClick={() => handleBookSport(sport.name)}>Book Now</button>
                   </div>
                 </div>
               </div>

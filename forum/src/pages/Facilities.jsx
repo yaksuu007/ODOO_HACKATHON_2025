@@ -24,9 +24,8 @@ export default function Facilities() {
   if (error) return <div style={{ padding: 24, color: 'tomato' }}>Error: {error}</div>;
 
   return (
-    <div className="container" style={{ padding: 24 }}>
+    <div className="container" style={{ padding: 24, paddingTop: 120 }}>
       <h1 style={{ marginBottom: 16 }}>Facilities</h1>
-      <p style={{ marginBottom: 24 }}>Browse all sports facilities and open their details.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
         {venues.map((v) => (
           <div key={v.v_no} style={{ border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', background: '#0b1220' }}>

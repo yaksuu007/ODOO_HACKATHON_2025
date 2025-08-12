@@ -125,6 +125,17 @@ class ApiService {
         });
     }
 
+    async getBooking(bookingId) {
+        return this.request(`/booking/${bookingId}`);
+    }
+
+    async submitBookingReview(bookingId, reviewData) {
+        return this.request(`/booking/${bookingId}/review`, {
+            method: 'POST',
+            body: JSON.stringify(reviewData)
+        });
+    }
+
     async getBookings(userId = null) {
         const endpoint = userId ? `/bookings/user/${userId}` : '/bookings';
         return this.request(endpoint);
@@ -153,6 +164,10 @@ class ApiService {
 
     async getVenueReviews(venueId) {
         return this.request(`/venue/${venueId}/reviews`);
+    }
+
+    async getVenueRatingsLast7(venueId) {
+        return this.request(`/venue/${venueId}/ratings/last7`);
     }
 
     // Payment APIs

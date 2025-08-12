@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, current_app
 from flask_login import login_required, current_user, login_user, logout_user
 from models import db, Login, Venue, Booking, Review, Match
 from flask_bcrypt import Bcrypt
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from sqlalchemy import and_, or_, func
 import os
 from werkzeug.utils import secure_filename
@@ -315,6 +315,17 @@ def create_booking():
         except ValueError:
             return jsonify({"error": "Invalid date or time format"}), 400
         
+        # Normalize duration to integer hours
+        try:
+            duration_hours = int(round(float(data["duration"])));
+        except Exception:
+            return jsonify({"error": "Invalid duration value"}), 400
+
+        # Compute end_time
+        start_dt = datetime.combine(date.today(), start_time)
+        end_dt = start_dt + timedelta(hours=duration_hours)
+        end_time = end_dt.time()
+
         # Check if venue is available
         existing_booking = Booking.query.filter(
             and_(
@@ -328,7 +339,7 @@ def create_booking():
                     ),
                     and_(
                         start_time <= Booking.start_time,
-                        func.addtime(start_time, func.sec_to_time(data["duration"] * 3600)) > Booking.start_time
+                        func.addtime(start_time, func.sec_to_time(duration_hours * 3600)) > Booking.start_time
                     )
                 )
             )
@@ -338,7 +349,7 @@ def create_booking():
             return jsonify({"error": "Venue is not available at this time"}), 409
         
         # Calculate total amount
-        total_amount = float(venue.per_hr_charge) * data["duration"]
+        total_amount = float(venue.per_hr_charge) * duration_hours
         
         # Create booking
         new_booking = Booking(
@@ -348,7 +359,8 @@ def create_booking():
             email=current_user.email,
             st_date=booking_date,
             start_time=start_time,
-            duration=data["duration"],
+            end_time=end_time,
+            duration=duration_hours,
             pay_method=data["pay_method"],
             total_amount=total_amount
         )
@@ -364,6 +376,113 @@ def create_booking():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Booking creation failed: {str(e)}"}), 500
+
+@api.route("/booking/<int:booking_id>", methods=["GET"])
+@login_required
+def get_booking(booking_id):
+    """Get a single booking details for current user (player or facility owner for that venue)"""
+    try:
+        booking = Booking.query.get(booking_id)
+        if not booking:
+            return jsonify({"error": "Booking not found"}), 404
+
+        # Authorization: player or venue owner
+        venue = Venue.query.get(booking.venue_id)
+        if not (current_user.sr_no == booking.player_id or (venue and venue.user_id == current_user.sr_no)):
+            return jsonify({"error": "Unauthorized to view this booking"}), 403
+
+        return jsonify(booking.to_dict()), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch booking: {str(e)}"}), 500
+
+@api.route("/booking/<int:booking_id>/review", methods=["POST"])
+@login_required
+def review_booking(booking_id):
+    """Post a review tied to a booking, only by the player who booked it"""
+    try:
+        booking = Booking.query.get(booking_id)
+        if not booking:
+            return jsonify({"error": "Booking not found"}), 404
+
+        if current_user.sr_no != booking.player_id:
+            return jsonify({"error": "Only the player who made this booking can review it"}), 403
+
+        data = request.json or {}
+        rating = int(data.get("rating", 0))
+        comment = data.get("comment", "")
+        if rating < 1 or rating > 5:
+            return jsonify({"error": "Rating must be between 1 and 5"}), 400
+
+        # Ensure only one review per booking/user
+        existing = Review.query.filter_by(booking_id=booking.Bno, user_id=current_user.sr_no).first()
+        if existing:
+            # Update existing review
+            existing.rating = rating
+            existing.comment = comment
+            db.session.commit()
+            return jsonify({"message": "Review updated", "review": existing.to_dict()}), 200
+
+        # Create new review
+        new_review = Review(
+            venue_id=booking.venue_id,
+            user_id=current_user.sr_no,
+            booking_id=booking.Bno,
+            rating=rating,
+            comment=comment,
+            is_verified=True
+        )
+        db.session.add(new_review)
+        db.session.commit()
+        return jsonify({"message": "Review created", "review": new_review.to_dict()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to create review: {str(e)}"}), 500
+
+@api.route("/venue/<int:venue_id>/ratings/last7", methods=["GET"])
+def venue_ratings_last7(venue_id):
+    """Return average rating per day for the last 7 days for a venue"""
+    try:
+        # Ensure venue exists
+        venue = Venue.query.get(venue_id)
+        if not venue:
+            return jsonify({"error": "Venue not found"}), 404
+
+        today = date.today()
+        start_date = today - timedelta(days=6)
+        start_dt = datetime.combine(start_date, time.min)
+
+        rows = (
+            db.session.query(
+                func.date(Review.created_at).label('day'),
+                func.avg(Review.rating).label('avg_rating'),
+                func.count(Review.review_id).label('count')
+            )
+            .filter(
+                Review.venue_id == venue_id,
+                Review.created_at >= start_dt
+            )
+            .group_by(func.date(Review.created_at))
+            .order_by(func.date(Review.created_at).asc())
+            .all()
+        )
+
+        by_day = {str(r.day): {"avg_rating": float(r.avg_rating or 0), "count": int(r.count)} for r in rows}
+
+        series = []
+        for i in range(7):
+            d = start_date + timedelta(days=i)
+            key = d.isoformat()
+            data = by_day.get(key, {"avg_rating": 0.0, "count": 0})
+            series.append({
+                "date": key,
+                "day_name": d.strftime('%a'),
+                "avg_rating": round(data["avg_rating"], 2),
+                "count": data["count"],
+            })
+
+        return jsonify({"venue_id": venue_id, "series": series}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch ratings: {str(e)}"}), 500
 
 @api.route("/bookings", methods=["GET"])
 @login_required

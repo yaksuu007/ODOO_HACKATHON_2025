@@ -292,7 +292,10 @@
 /* Hero Section with 3D Beams Background */
 .hero-section {
   padding: 140px 0 80px; /* Increased top padding to account for fixed navbar */
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background-image: url('/public/images/background.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -378,7 +381,7 @@
 
 .hero-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(148, 163, 184, 0.1);

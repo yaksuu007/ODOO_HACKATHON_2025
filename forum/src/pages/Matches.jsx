@@ -57,9 +57,8 @@ export default function Matches() {
   if (error) return <div style={{ padding: 24, color: 'tomato' }}>Error: {error}</div>;
 
   return (
-    <div className="container" style={{ padding: 24 }}>
+    <div className="container" style={{ padding: 24, paddingTop: 120 }}>
       <h1 style={{ marginBottom: 16 }}>Matches</h1>
-      <p style={{ marginBottom: 24 }}>Browse and create community matches. Matches are stored in a separate database.</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
         <form onSubmit={handleCreate} style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: 16 }}>

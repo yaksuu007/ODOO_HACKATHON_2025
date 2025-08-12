@@ -80,6 +80,7 @@ class Venue(db.Model):
             "v_no": self.v_no,
             "user_id": self.user_id,
             "address": self.address,
+            "location": self.address,  # alias for frontend compatibility
             "court_name": self.court_name,
             "rating": float(self.rating) if self.rating else None,
             "per_hr_charge": float(self.per_hr_charge),

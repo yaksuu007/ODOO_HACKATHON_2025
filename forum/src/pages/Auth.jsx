@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./styles/Auth.css";
 
 const Auth = ({ setUser }) => {
@@ -15,6 +15,11 @@ const Auth = ({ setUser }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('redirect') || '/';
+  }, [location.search]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -75,8 +80,8 @@ const Auth = ({ setUser }) => {
         setUser(data.user);
       }
 
-      // On successful login or registration, navigate to profile or home page
-      navigate("/");
+      // On success, navigate to original destination (e.g., back to venue to book)
+      navigate(redirectTo);
     } catch (err) {
       setError("Failed to connect to server");
       setLoading(false);

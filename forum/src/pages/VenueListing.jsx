@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./styles/VenueListing.css";
 
 export default function VenueListing() {
@@ -14,6 +14,7 @@ export default function VenueListing() {
 
   const venuesPerPage = 6;
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetch("http://localhost:5001/api/venues")
@@ -30,6 +31,16 @@ export default function VenueListing() {
         setLoading(false);
       });
   }, []);
+
+  // Apply preselected sport from query string, e.g. /VenueListing?sport=Tennis
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const sport = params.get("sport");
+    if (sport) {
+      setSelectedSports([sport]);
+      setCurrentPage(1);
+    }
+  }, [location.search]);
 
   // Defensive: only call flatMap if venues is an array
   const allSports = [...new Set(

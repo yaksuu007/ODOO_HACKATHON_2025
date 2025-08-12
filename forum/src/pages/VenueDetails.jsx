@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../services/apiService";
 import { useParams, useNavigate } from "react-router-dom";
 import "./styles/VenueDetails.css";
 
@@ -15,6 +16,7 @@ export default function VenueDetails() {
     sportType: "",
   });
   const [user, setUser] = useState(null);
+  const [ratingsSeries, setRatingsSeries] = useState([]);
 
   useEffect(() => {
     // Get user from localStorage
@@ -29,11 +31,13 @@ export default function VenueDetails() {
 
     // Fetch venue details
     fetchVenueDetails();
+    // Fetch last 7 days ratings
+    fetchRatingsLast7();
   }, [id]);
 
   const fetchVenueDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/venues/${id}`);
+      const response = await fetch(`http://localhost:5001/api/venue/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch venue details');
       }
@@ -51,12 +55,21 @@ export default function VenueDetails() {
     }
   };
 
+  const fetchRatingsLast7 = async () => {
+    try {
+      const result = await api.getVenueRatingsLast7(id);
+      setRatingsSeries(result.series || []);
+    } catch (e) {
+      setRatingsSeries([]);
+    }
+  };
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     
     if (!user) {
       alert('Please login to book a venue');
-      navigate('/auth');
+      navigate(`/Auth?redirect=/venue/${id}`);
       return;
     }
 
@@ -65,20 +78,30 @@ export default function VenueDetails() {
       return;
     }
 
+    // Validate time order and compute duration in hours
+    const [sh, sm] = bookingData.startTime.split(':').map(Number);
+    const [eh, em] = bookingData.endTime.split(':').map(Number);
+    const startMinutes = sh * 60 + sm;
+    const endMinutes = eh * 60 + em;
+    if (endMinutes <= startMinutes) {
+      alert('End time must be after start time');
+      return;
+    }
+    const durationHours = (endMinutes - startMinutes) / 60;
+
     try {
-      const response = await fetch('http://localhost:5001/api/bookings', {
+      const response = await fetch('http://localhost:5001/api/booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          venue_id: id,
-          user_id: user.id,
-          booking_date: bookingData.date,
+          venue_id: Number(id),
+          st_date: bookingData.date,
           start_time: bookingData.startTime,
-          end_time: bookingData.endTime,
-          sport_type: bookingData.sportType,
-          total_amount: venue.per_hr_charge,
+          duration: durationHours,
+          pay_method: bookingData.payMethod || 'cash',
         }),
       });
 
@@ -87,7 +110,8 @@ export default function VenueDetails() {
       }
 
       const data = await response.json();
-      navigate(`/BookingConfirmation/${data.id}`);
+      const bookingId = data?.booking?.Bno || data?.booking?.id || data?.id;
+      navigate(`/BookingConfirmation/${bookingId}`);
     } catch (error) {
       console.error('Error creating booking:', error);
       alert('Failed to create booking. Please try again.');
@@ -179,6 +203,44 @@ export default function VenueDetails() {
                 <h3>Operating Hours</h3>
                 <p>{venue.operating_hours || "6:00 AM - 10:00 PM"}</p>
               </div>
+            </div>
+          </div>
+
+          {/* Ratings Graph */}
+          <div className="venue-description">
+            <h3>Last 7 Days Ratings</h3>
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+              <svg width={560} height={180} viewBox="0 0 560 180" role="img" aria-label="Venue ratings last 7 days">
+                {/* Axes */}
+                <line x1="40" y1="140" x2="540" y2="140" stroke="#475569" strokeWidth="1" />
+                <line x1="40" y1="20" x2="40" y2="140" stroke="#475569" strokeWidth="1" />
+                {/* Y labels 0..5 */}
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <g key={i}>
+                    <text x={10} y={140 - (i * 24)} fill="#94a3b8" fontSize="10">{i}</text>
+                    <line x1="40" y1={140 - (i * 24)} x2="540" y2={140 - (i * 24)} stroke="#334155" strokeWidth="0.5" />
+                  </g>
+                ))}
+                {/* Data line */}
+                {(() => {
+                  const points = (ratingsSeries.length ? ratingsSeries : Array.from({ length: 7 }).map((_, idx) => ({ date: '', day_name: '', avg_rating: 0 })));
+                  const xStep = (500 / 6);
+                  const toX = (idx) => 40 + (idx * xStep);
+                  const toY = (val) => 140 - (val * (24));
+                  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${toX(i)} ${toY(Math.min(5, Math.max(0, p.avg_rating || 0)))}`).join(' ');
+                  return (
+                    <g>
+                      <path d={path} fill="none" stroke="#60a5fa" strokeWidth="2" />
+                      {points.map((p, i) => (
+                        <g key={i}>
+                          <circle cx={toX(i)} cy={toY(Math.min(5, Math.max(0, p.avg_rating || 0)))} r={3} fill="#93c5fd" />
+                          <text x={toX(i)} y={155} textAnchor="middle" fill="#94a3b8" fontSize="10">{p.day_name}</text>
+                        </g>
+                      ))}
+                    </g>
+                  );
+                })()}
+              </svg>
             </div>
           </div>
 
@@ -274,6 +336,19 @@ export default function VenueDetails() {
                       {sport.trim()}
                     </option>
                   ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Payment Method</label>
+                <select
+                  name="payMethod"
+                  value={bookingData.payMethod || 'cash'}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="cash">Cash</option>
+                  <option value="online">Online</option>
                 </select>
               </div>
 
