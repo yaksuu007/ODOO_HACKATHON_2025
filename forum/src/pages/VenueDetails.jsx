@@ -17,6 +17,13 @@ export default function VenueDetails() {
   });
   const [user, setUser] = useState(null);
   const [ratingsSeries, setRatingsSeries] = useState([]);
+  const venueImageMap = {
+    "Sunrise Tennis Court": "/images/venues/Sunrise Tennis Court.jpg",
+    "Downtown Badminton Hub": "/images/venues/Downtown Badminton Hub.jpg",
+    "Riverbank Basketball Arena": "/images/venues/Riverbank Basketball Arena.jpg",
+    "Hillside Football Ground": "/images/venues/Hillside Football Ground.jpg",
+    "City Squash Courts": "/images/venues/City Squash Courts.jpg",
+  };
 
   useEffect(() => {
     // Get user from localStorage
@@ -167,8 +174,12 @@ export default function VenueDetails() {
         <div className="venue-info-section">
           <div className="venue-image">
             <img 
-              src={venue.image || "https://via.placeholder.com/600x400?text=Venue+Image"} 
+              src={venueImageMap[venue.court_name] || `/images/venues/${venue.court_name}.jpg`}
               alt={venue.court_name}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "https://via.placeholder.com/600x400?text=Venue+Image";
+              }}
             />
           </div>
 

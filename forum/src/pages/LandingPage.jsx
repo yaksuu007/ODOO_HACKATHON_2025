@@ -8,6 +8,9 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [featuredVenues, setFeaturedVenues] = useState([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [featuredError, setFeaturedError] = useState(null);
 
   // Check if user is logged in on component mount
   useEffect(() => {
@@ -30,6 +33,36 @@ const LandingPage = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Featured venues (dynamic from API)
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const res = await fetch('http://localhost:5001/api/venues');
+        if (!res.ok) throw new Error('Failed to fetch venues');
+        const data = await res.json();
+        setFeaturedVenues(Array.isArray(data) ? data.slice(0, 5) : []);
+        setFeaturedLoading(false);
+      } catch (e) {
+        setFeaturedError('Could not load featured venues');
+        setFeaturedLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  const venueImageMap = {
+    'Sunrise Tennis Court': '/images/venues/Sunrise Tennis Court.jpg',
+    'Downtown Badminton Hub': '/images/venues/Downtown Badminton Hub.jpg',
+    'Riverbank Basketball Arena': '/images/venues/Riverbank Basketball Arena.jpg',
+    'Hillside Football Ground': '/images/venues/Hillside Football Ground.jpg',
+    'City Squash Courts': '/images/venues/City Squash Courts.jpg',
+  };
+
+  const getVenueImageSrc = (venue) => {
+    const name = venue?.court_name || '';
+    return venueImageMap[name] || `/images/venues/${name}.jpg`;
+  };
 
   const handleGetStarted = () => {
     if (isLoggedIn) {
@@ -169,6 +202,56 @@ const LandingPage = () => {
           </div>
           <div className="hero-image">
             <img src="https://i.ibb.co/Xxfh0CSK/Screenshot-2025-08-12-072956.png"/>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Venues (Dynamic from API) */}
+      <section className="sports-showcase">
+        <div className="container">
+          <div className="section-header">
+            <h2>Featured Venues</h2>
+            <p>Fresh from our database — book a slot at these popular venues</p>
+          </div>
+          <div className="sports-grid">
+            {featuredLoading && (
+              <div className="loading-spinner"><div className="spinner"></div></div>
+            )}
+            {featuredError && !featuredLoading && (
+              <div className="error-message">
+                <i className="fas fa-exclamation-triangle"></i>
+                <p>{featuredError}</p>
+              </div>
+            )}
+            {!featuredLoading && !featuredError && featuredVenues.length === 0 && (
+              <div className="no-venues">
+                <div className="no-venues-icon">🏟️</div>
+                <h3>No venues available yet</h3>
+                <p>Venue owners can add facilities which will appear here.</p>
+              </div>
+            )}
+            {!featuredLoading && !featuredError && featuredVenues.map((v) => (
+              <div key={v.v_no} className="sport-card" role="button" onClick={() => navigate(`/venue/${v.v_no}`)}>
+                <div className="sport-image">
+                  <img
+                    src={getVenueImageSrc(v)}
+                    alt={v.court_name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = 'https://via.placeholder.com/1200x800?text=Venue+Image';
+                    }}
+                  />
+                  <div className="sport-overlay">
+                    <h3>{v.court_name}</h3>
+                    <p>{v.sports}</p>
+                    <button className="btn-primary" onClick={(e) => { e.stopPropagation(); navigate(`/venue/${v.v_no}`); }}>View</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 24 }}>
+            <button className="btn-outline btn-large" onClick={() => navigate('/VenueListing')}>See all venues</button>
           </div>
         </div>
       </section>

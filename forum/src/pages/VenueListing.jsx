@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./styles/VenueListing.css";
 
@@ -15,6 +15,19 @@ export default function VenueListing() {
   const venuesPerPage = 6;
   const navigate = useNavigate();
   const location = useLocation();
+
+  const venueImageMap = useMemo(() => ({
+    "Sunrise Tennis Court": "/images/venues/Sunrise Tennis Court.jpg",
+    "Downtown Badminton Hub": "/images/venues/Downtown Badminton Hub.jpg",
+    "Riverbank Basketball Arena": "/images/venues/Riverbank Basketball Arena.jpg",
+    "Hillside Football Ground": "/images/venues/Hillside Football Ground.jpg",
+    "City Squash Courts": "/images/venues/City Squash Courts.jpg",
+  }), []);
+
+  const getVenueImageSrc = (venue) => {
+    const name = venue?.court_name || "";
+    return venueImageMap[name] || `/images/venues/${name}.jpg`;
+  };
 
   useEffect(() => {
     fetch("http://localhost:5001/api/venues")
@@ -210,9 +223,13 @@ export default function VenueListing() {
                 }}
               >
                 <img
-                  src={venue.image || "https://via.placeholder.com/320x200?text=Venue+Image"}
+                  src={getVenueImageSrc(venue)}
                   alt={venue.court_name}
                   className="venue-img"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "https://via.placeholder.com/320x200?text=Venue+Image";
+                  }}
                 />
                 <div className="venue-card-body">
                   <h3 className="venue-title">{venue.court_name}</h3>

@@ -10,16 +10,11 @@ export default function MyBookings() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const defaultTabFromQuery = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    const view = params.get('view');
-    if (view === 'past') return 'past';
-    return 'all';
-  }, [location.search]);
 
-  useEffect(() => {
-    setActiveTab(defaultTabFromQuery);
-  }, [defaultTabFromQuery]);
+  const isPastView = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('view') === 'past';
+  }, [location.search]);
 
   useEffect(() => {
     // Get user from localStorage
@@ -28,11 +23,7 @@ export default function MyBookings() {
       try {
         const user = JSON.parse(userData);
         setUser(user);
-        if (user?.designation === 'facilities') {
-          fetchOwnerBookings(user.id);
-        } else {
-          fetchBookings(user.id);
-        }
+        fetchBookings();
       } catch (error) {
         console.error('Error parsing user data:', error);
         setError('Failed to load user data');
@@ -44,9 +35,9 @@ export default function MyBookings() {
     }
   }, []);
 
-  const fetchBookings = async (userId) => {
+  const fetchBookings = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/api/bookings/user/${userId}`);
+      const response = await fetch(`http://localhost:5001/api/bookings`, { credentials: 'include' });
       if (!response.ok) {
         throw new Error('Failed to fetch bookings');
       }
@@ -60,30 +51,13 @@ export default function MyBookings() {
     }
   };
 
-  const fetchOwnerBookings = async (ownerId) => {
-    try {
-      // Expected backend endpoint for facility owner's bookings
-      const response = await fetch(`http://localhost:5001/api/bookings/owner/${ownerId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch owner bookings');
-      }
-      const data = await response.json();
-      setBookings(data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching owner bookings:', error);
-      setError('Failed to load facility bookings');
-      setLoading(false);
-    }
-  };
-
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm('Are you sure you want to cancel this booking?')) {
       return;
     }
 
     try {
-      const response = await fetch(`http://localhost:5001/api/bookings/${bookingId}/cancel`, {
+      const response = await fetch(`http://localhost:5001/api/booking/${bookingId}/cancel`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +69,7 @@ export default function MyBookings() {
       }
 
       // Refresh bookings
-      fetchBookings(user.id);
+      fetchBookings();
     } catch (error) {
       console.error('Error canceling booking:', error);
       alert('Failed to cancel booking');
@@ -117,20 +91,25 @@ export default function MyBookings() {
     }
   };
 
-  const filteredBookings = bookings.filter(booking => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'past') {
-      const bookingDate = new Date(booking.booking_date);
-      const now = new Date();
-      // If end_time exists, combine with booking_date for better accuracy
-      if (booking.end_time) {
-        const [h, m] = String(booking.end_time).split(':');
-        bookingDate.setHours(parseInt(h || '0', 10), parseInt(m || '0', 10), 0, 0);
-      }
-      return bookingDate < now;
+  const filteredBookings = useMemo(() => {
+    let result = bookings.filter((booking) => {
+      if (activeTab === 'all') return true;
+      return (booking.status || '').toLowerCase() === activeTab;
+    });
+
+    if (isPastView) {
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      result = result.filter((b) => {
+        const dateValue = b.st_date || b.booking_date;
+        if (!dateValue) return false;
+        const d = new Date(dateValue);
+        return d < startOfToday;
+      });
     }
-    return booking.status.toLowerCase() === activeTab;
-  });
+
+    return result;
+  }, [bookings, activeTab, isPastView]);
 
   const getBookingStats = () => {
     const stats = {
@@ -139,14 +118,6 @@ export default function MyBookings() {
       pending: bookings.filter(b => b.status.toLowerCase() === 'pending').length,
       completed: bookings.filter(b => b.status.toLowerCase() === 'completed').length,
       cancelled: bookings.filter(b => b.status.toLowerCase() === 'cancelled').length,
-      past: bookings.filter(b => {
-        const d = new Date(b.booking_date);
-        if (b.end_time) {
-          const [h, m] = String(b.end_time).split(':');
-          d.setHours(parseInt(h || '0', 10), parseInt(m || '0', 10), 0, 0);
-        }
-        return d < new Date();
-      }).length,
     };
     return stats;
   };
@@ -181,8 +152,8 @@ export default function MyBookings() {
 
   return (
     <div className="my-bookings">
-      <h1 className="page-title">My Bookings</h1>
-      <p className="page-subtitle">Manage and track all your sports venue bookings</p>
+      <h1 className="page-title">{isPastView ? 'Previous Bookings' : 'My Bookings'}</h1>
+      <p className="page-subtitle">{isPastView ? 'Your completed or past bookings' : 'Manage and track all your sports venue bookings'}</p>
 
       {/* Booking Stats */}
       <div className="booking-stats">
@@ -231,12 +202,6 @@ export default function MyBookings() {
           Completed ({stats.completed})
         </button>
         <button
-          className={`tab ${activeTab === 'past' ? 'active' : ''}`}
-          onClick={() => setActiveTab('past')}
-        >
-          Past ({stats.past})
-        </button>
-        <button
           className={`tab ${activeTab === 'cancelled' ? 'active' : ''}`}
           onClick={() => setActiveTab('cancelled')}
         >
@@ -249,10 +214,10 @@ export default function MyBookings() {
         {filteredBookings.length === 0 ? (
           <div className="no-bookings">
             <div className="no-bookings-icon">📅</div>
-            <h3>No bookings found</h3>
+            <h3>No {isPastView ? 'previous' : ''} bookings found</h3>
             <p>
               {activeTab === 'all' 
-                ? "You haven't made any bookings yet. Start by exploring our venues!"
+                ? (isPastView ? "You have no previous bookings yet." : "You haven't made any bookings yet. Start by exploring our venues!")
                 : `You don't have any ${activeTab} bookings.`
               }
             </p>
@@ -265,73 +230,63 @@ export default function MyBookings() {
           </div>
         ) : (
           filteredBookings.map((booking) => {
-            const venueName = booking.venue_name || booking.court_name || booking.facility || booking.venue || 'Venue';
-            const venueImg = booking.venue_image || booking.image || booking.photo || "https://via.placeholder.com/320x200?text=Venue+Image";
-            const rawDate = booking.booking_date || booking.date || booking.st_date || booking.created_at;
-            const start = booking.start_time || booking.start || booking.startTime;
-            const end = booking.end_time || booking.end || booking.endTime;
-            const locationStr = booking.venue_location || booking.location || booking.facility_location || booking.address || '—';
-            const sport = booking.sport_type || booking.sport || booking.sports || '—';
-            const amount = booking.total_amount ?? booking.amount ?? booking.price ?? booking.total ?? '—';
-            const status = (booking.status || 'pending');
-
-            let dateStr = '—';
-            try { if (rawDate) dateStr = new Date(rawDate).toLocaleDateString(); } catch(e) {}
-
+            const bookingId = booking.Bno || booking.id;
+            const stDate = booking.st_date || booking.booking_date;
+            const startTime = (booking.start_time || '').slice(0,5);
+            const endTime = (booking.end_time || '').slice(0,5);
+            const venueName = booking.venue_name || `Venue #${booking.venue_id}`;
+            const venueLocation = booking.venue_address || booking.venue_location || '';
+            const totalAmount = booking.total_amount ?? booking.amount ?? booking.price ?? '';
             return (
-              <div key={booking.id || `${venueName}-${rawDate}`} className="booking-card">
-                <img
-                  src={venueImg}
-                  alt={venueName}
-                  className="booking-img"
-                />
-                <div className="booking-info">
-                  <h3 className="booking-title">{venueName}</h3>
-                  <div className="booking-details">
-                    <div className="booking-detail">
-                      <i className="fas fa-calendar"></i>
-                      <span>{dateStr}</span>
-                    </div>
-                    <div className="booking-detail">
-                      <i className="fas fa-clock"></i>
-                      <span>{start && end ? `${start} - ${end}` : (start || end || '—')}</span>
-                    </div>
-                    <div className="booking-detail">
-                      <i className="fas fa-map-marker-alt"></i>
-                      <span>{locationStr}</span>
-                    </div>
-                    <div className="booking-detail">
-                      <i className="fas fa-running"></i>
-                      <span>{sport}</span>
-                    </div>
-                    <div className="price">
-                      <i className="fas fa-rupee-sign"></i>
-                      <span>{amount}</span>
-                    </div>
+            <div key={booking.id} className="booking-card">
+              <img
+                src={booking.venue_image || "https://via.placeholder.com/320x200?text=Venue+Image"}
+                alt={venueName}
+                className="booking-img"
+              />
+              <div className="booking-info">
+                <h3 className="booking-title">{venueName}</h3>
+                <div className="booking-details">
+                  <div className="booking-detail">
+                    <i className="fas fa-calendar"></i>
+                    <span>{stDate ? new Date(stDate).toLocaleDateString() : ''}</span>
                   </div>
-                  <div className={`status ${getStatusColor(status)}`}>
-                    {status}
+                  <div className="booking-detail">
+                    <i className="fas fa-clock"></i>
+                    <span>{startTime} - {endTime}</span>
                   </div>
-                  <div className="booking-actions">
-                    <button
-                      className="details-btn"
-                      onClick={() => navigate(`/booking/${booking.id}`)}
-                    >
-                      <i className="fas fa-eye"></i>
-                      View Details
-                    </button>
-                    {String(status).toLowerCase() === 'confirmed' && (
-                      <button
-                        className="cancel-btn"
-                        onClick={() => handleCancelBooking(booking.id)}
-                      >
-                        <i className="fas fa-times"></i>
-                        Cancel
-                      </button>
-                    )}
+                  <div className="booking-detail">
+                    <i className="fas fa-map-marker-alt"></i>
+                    <span>{venueLocation}</span>
+                  </div>
+                  <div className="price">
+                    <i className="fas fa-rupee-sign"></i>
+                    <span>{totalAmount}</span>
                   </div>
                 </div>
+                <div className={`status ${getStatusColor(booking.status)}`}>
+                  {booking.status}
+                </div>
+                <div className="booking-actions">
+                  <button
+                    className="details-btn"
+                    onClick={() => booking.venue_id && navigate(`/venue/${booking.venue_id}`)}
+                  >
+                    <i className="fas fa-eye"></i>
+                    View Venue
+                  </button>
+                  {booking.status.toLowerCase() === 'confirmed' && (
+                    <button
+                      className="cancel-btn"
+                      onClick={() => handleCancelBooking(bookingId)}
+                    >
+                      <i className="fas fa-times"></i>
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
+            </div>
             );
           })
         )}
